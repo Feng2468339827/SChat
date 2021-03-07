@@ -1,16 +1,20 @@
-import mongoose from 'mongoose'
+let mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const userSchema = new Schema({
 	name: String,
-	id: Number,
   avatar: {type: String, default: 'default.jpg'},
   password: String,
-  phone: Number
+  phone: Number,
+  friends: {type: Array, default: []}
 })
 
 userSchema.index({id: 1})
 
-const User = mongoose.model('User', userSchema)
+let User = mongoose.model('User', userSchema)
 
-export default User
+// User.find((err, user) => {
+//   console.log(user)
+//   console.log(err)
+// })
+module.exports = User

@@ -5,6 +5,7 @@ var app = require('koa')()
   , onerror = require('koa-onerror');
 
 var index = require('./routes/index');
+var db = require('./mongodb/db')
 var users = require('./routes/users');
 
 // error handler
