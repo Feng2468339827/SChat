@@ -1,0 +1,30 @@
+{
+  "id": "2317582",
+  "name": "bi'ye'she'ji",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "425652",
+      "name": "我的",
+      "font_class": "wode",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "1581577",
+      "name": "聊天",
+      "font_class": "liaotian",
+      "unicode": "e63c",
+      "unicode_decimal": 58940
+    },
+    {
+      "icon_id": "15994972",
+      "name": "通讯录",
+      "font_class": "tongxunlu",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    }
+  ]
+}

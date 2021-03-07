@@ -1,0 +1,5 @@
+export const SET_NAVTYPE = 'SET_NAVTYPE'
+export const SET_TITLE = 'SET_TITLE'
+export const SET_SEARCH = 'SET_SEARCH'
+export const SET_LOGINSTATUS = 'SET_LOGINSTATUS'
+export const SET_LOGINTOKEN = 'SET_LOGINTOKEN'
