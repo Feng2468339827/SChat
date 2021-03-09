@@ -1,4 +1,4 @@
-let mongoose = require('mongoose')
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const chatSchema = new Schema({
@@ -10,5 +10,4 @@ chatSchema.index({id: 1})
 
 const Chat = mongoose.model('Id',chatSchema)
 
-export default Chat
 module.exports = Id

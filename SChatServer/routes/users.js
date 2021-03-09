@@ -1,7 +1,8 @@
-let router = require('koa-router')()
-let User = require('../models/user.js')
-let Id = require('../models/id.js')
-let { newPwd } = require('../config/utils')
+const router = require('koa-router')()
+const User = require('../models/user.js')
+const Id = require('../models/id.js')
+const co = require('co')
+const { newPwd } = require('../config/utils')
 
 const avatar = 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default.jpg?Expires=1615124373&OSSAccessKeyId=TMP.3Ki9eFkkpkPeejomKL3p4E69UYnEUtGZXJuV4VfJt5sH1zcR7sh85qWp6mRfvJEkUTr8Ps2zFabffEDcG87KebKHV4C6zK&Signature=vZXek8M0M3MY9485oTgqs7nKN2U%3D'
 const reg_phone = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
@@ -34,23 +35,24 @@ router.post('/login', function *(next)  {
         message: '密码不能为空'
       }
     } else {
-      let user = yield User.findOne({
+      yield User.findOne({
         phone,
         password: newPwd(password)
+      }, (err, user) => {
+        // 若搜寻到此用户，则登录成功
+        if (user) {
+          this.body = {
+            status: 200,
+            message: '登陆成功',
+            user
+          }
+        } else {
+          this.body = {
+            status: 0,
+            message: '手机号或密码错误'
+          }
+        }
       })
-      // 若搜寻到此用户，则登录成功
-      if (user) {
-        this.body = {
-          status: 200,
-          message: '登陆成功',
-          user
-        }
-      } else {
-        this.body = {
-          status: 0,
-          message: '手机号或密码错误'
-        }
-      }
     }
   } catch (error) {
     console.err(error)
@@ -89,30 +91,30 @@ router.post('/register', function *(next) {
       }
     } else {
       // 查找手机号是否已被注册
-      let user = yield User.findOne({ phone })
-      // 手机号已被注册
-      if (user) {
-        this.body = {
-          status: 0,
-          message: '该手机号已被注册'
+      yield User.findOne({ phone }, (err, user) => {
+        // 手机号已被注册
+        if (user) {
+          this.body = {
+            status: 0,
+            message: '该手机号已被注册'
+          }
+        } else {
+          // 手机号未被注册，将密码加密保存进数据库
+          new User({
+            phone,
+            password: newPwd(password),
+            avatar,
+            name
+          }).save()
+          this.body = {
+            status: 200,
+            message: '注册成功'
+          }
         }
-      } else {
-        // 手机号未被注册，将密码加密保存进数据库
-        new User({
-          phone,
-          password: newPwd(password),
-          avatar,
-          name
-        }).save()
-        // 应该写在回调里的，但还不知道怎么做
-        this.body = {
-          status: 200,
-          message: '注册成功'
-        }
-      }
+      })
     }
-  } catch (error) {
-    console.err(error)
+  } catch (err) {
+    console.error(err)
   }
 })
 
@@ -124,60 +126,143 @@ router.get('/findfriend', function *(next) {
     // 根据手机号搜索用户
     const { phone } = this.request.query
     // 返回头像和名字
-    let user = yield User.findOne({ phone }, 'name avatar')
-
-    // 查找得到返回用户信息
-    if (user) return this.body = {
-      status: 200,
-      message: '搜索成功',
-      user
-    }
-    // 查找不到用户
-    this.body = {
-      status: 0,
-      message: '该用户不存在'
-    }
+    yield User.findOne({ phone }, 'name avatar phone', (err, user) => {
+      // 查找得到返回用户信息
+      if (user) return this.body = {
+        status: 200,
+        message: '搜索成功',
+        user
+      }
+      // 查找不到用户
+      this.body = {
+        status: 0,
+        message: '该用户不存在'
+      }
+    })
   } catch (error) {
     console.error(error)
   }
 })
 
 /**
- * 添加好友
+ * 处理好友请求 
  */
-router.get('/addfriend', function *(next) {
+router.post('/handlereq', function *(next) {
+  try {
+    const {
+      userid,
+      id,
+      type
+    } = this.request.body
+    /**
+     * @param type
+     * agree 通过请求
+     * reject 拒绝请求
+     * delete 删除好友
+     */
+    
+    // 通过好友请求
+    if (type == 'agree') {
+      let fri = yield User.findOne({ _id: userid }, "name phone avatar _id friends")
+      let me = yield User.findOne({ _id: id }, "name phone avatar _id friends")
+      // 检测用户是否已添加此好友
+      let isAdd = false
+      for (let f of me.friends) {
+        if(f._id == fri._id) {
+          isAdd = true
+          break
+        }
+      }
+      if (!isAdd) {
+        // 更新用户好友列表
+        User.findOne({ _id: userid },function (err, user) {
+          user.friends.push(me)
+          user.save()
+        })
+        // 更新好友的好友列表
+        User.findOne({ _id: id },function (err, user) {
+          user.friends.push(fri)
+          // 找到对应请求，并将状态置为1
+          for (let r of user.request) {
+            if(r._id == userid) {
+              r.status = 1
+              break
+            }
+          }
+          user.save()
+        })
+        this.body = {
+          status: 200,
+          message: '添加成功'
+        }
+      } else {
+        this.body = {
+          status: 0,
+          message: '已添加该用户'
+        }
+      }
+    }
+
+    // 拒绝好友请求
+    if (type == 'reject') {
+      yield User.findOne({
+        _id: id
+      }, (err, user) => {
+        for (let r of user.request) {
+          // 找到对应请求，并将状态置为2
+          if(userid == r._id) {
+            r.status = 2
+            this.body = {
+              status: 200,
+              message: '拒绝成功'
+            }
+            user.save()
+            break
+          }
+        }
+      })
+    }
+  } catch (err)  {
+    console.error(err)
+  }
+})
+
+/**
+ * 发送好友请求
+ */
+router.post('/addfriend', function *(next) {
   try {
     // 根据手机号添加好友
-    const { phone, id } = this.query
+    const { phone, id } = this.request.body
     // 查找好友是否存在
     let fri = yield User.findOne({ phone })
-
+    let me = yield User.findOne({ _id: id })
+    // me.
     // 查找不到该好友，直接返回
     if (!fri) return this.body = {
       status: 0,
       message: '该用户不存在'
     }
-
-    // 查找该好友是否已添加
+    // if (me)
     /**
-     * 
-     *还没做 
-     * 
+     * @TODO 
+     * 1 好友已收到用户请求，不能重复请求
+     * 2 用户已添加好友，不能请求
      */
-
     // 将搜索好友信息存入用户friends数组内，添加成功
-    User.findOne({ _id: id }, function (err, user) {
+    User.findOne({ phone }, function (err, fri) {
       if (err) return console.error(err)
-      // 如果没有匹配 user是 null
-      if (user) {
-        user.friends.push(fri)
-        user.save()
+      if (fri) {
+        // 将用户添加到好友请求列表中
+        fri.request.push(me)
+        fri.save()
       }
     })
     this.body = {
       status: 200,
       message: '发送成功'
     }
+
   } catch (error) {
     console.error(error)
   }
