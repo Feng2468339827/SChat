@@ -1,7 +1,6 @@
 const router = require('koa-router')()
 const User = require('../models/user.js')
 const Id = require('../models/id.js')
-const co = require('co')
 const { newPwd } = require('../config/utils')
 
 const avatar = 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default.jpg?Expires=1615124373&OSSAccessKeyId=TMP.3Ki9eFkkpkPeejomKL3p4E69UYnEUtGZXJuV4VfJt5sH1zcR7sh85qWp6mRfvJEkUTr8Ps2zFabffEDcG87KebKHV4C6zK&Signature=vZXek8M0M3MY9485oTgqs7nKN2U%3D'
@@ -13,41 +12,41 @@ router.prefix('/users')
 /**
  * 用户登录
  */
-router.post('/login', function *(next)  {
+router.post('/login', async (ctx, next) => {
   try {
-    const { phone, password } = this.request.body
+    const { phone, password } = ctx.request.body
     // 手机号为空
     if (phone == '') {
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '手机号不能为空'
       }
     } else if (!reg_phone.test(phone)) {
       // 手机号不符合格式
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '请正确填写您的手机号码'
       }
     } else if (password == '') {
       // 密码为空
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '密码不能为空'
       }
     } else {
-      yield User.findOne({
+      await User.findOne({
         phone,
         password: newPwd(password)
       }, (err, user) => {
         // 若搜寻到此用户，则登录成功
         if (user) {
-          this.body = {
+          ctx.body = {
             status: 200,
             message: '登陆成功',
             user
           }
         } else {
-          this.body = {
+          ctx.body = {
             status: 0,
             message: '手机号或密码错误'
           }
@@ -62,39 +61,39 @@ router.post('/login', function *(next)  {
 /**
  * 用户注册
  */
-router.post('/register', function *(next) {
+router.post('/register', async (ctx, next) => {
   try {
     const {
       phone,
       password,
       repassword,
       name
-    } = this.request.body
+    } = ctx.request.body
 
     // 手机号为空
     if (phone == '') {
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '密码不能为空'
       }
     } else if (!reg_phone.test(phone)) {
       // 手机号不符合格式
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '正确填写您的手机号码'
       }
     } else if (password != repassword) {
       // 两次密码不一致
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '两次密码不一致'
       }
     } else {
       // 查找手机号是否已被注册
-      yield User.findOne({ phone }, (err, user) => {
+      await User.findOne({ phone }, (err, user) => {
         // 手机号已被注册
         if (user) {
-          this.body = {
+          ctx.body = {
             status: 0,
             message: '该手机号已被注册'
           }
@@ -106,7 +105,7 @@ router.post('/register', function *(next) {
             avatar,
             name
           }).save()
-          this.body = {
+          ctx.body = {
             status: 200,
             message: '注册成功'
           }
@@ -121,20 +120,20 @@ router.post('/register', function *(next) {
 /**
  * 搜索好友
  */
-router.get('/findfriend', function *(next) {
+router.get('/findfriend', async (ctx, next) => {
   try {
     // 根据手机号搜索用户
-    const { phone } = this.request.query
+    const { phone } = ctx.request.query
     // 返回头像和名字
-    yield User.findOne({ phone }, 'name avatar phone', (err, user) => {
+    await User.findOne({ phone }, 'name avatar phone', (err, user) => {
       // 查找得到返回用户信息
-      if (user) return this.body = {
+      if (user) return ctx.body = {
         status: 200,
         message: '搜索成功',
         user
       }
       // 查找不到用户
-      this.body = {
+      ctx.body = {
         status: 0,
         message: '该用户不存在'
       }
@@ -147,13 +146,13 @@ router.get('/findfriend', function *(next) {
 /**
  * 处理好友请求 
  */
-router.post('/handlereq', function *(next) {
+router.post('/handlereq', async (ctx, next) => {
   try {
     const {
       userid,
       id,
       type
-    } = this.request.body
+    } = ctx.request.body
     /**
      * @param type
      * agree 通过请求
@@ -163,8 +162,8 @@ router.post('/handlereq', function *(next) {
     
     // 通过好友请求
     if (type == 'agree') {
-      let fri = yield User.findOne({ _id: userid }, "name phone avatar _id friends")
-      let me = yield User.findOne({ _id: id }, "name phone avatar _id friends")
+      let fri = await User.findOne({ _id: userid }, "name phone avatar _id friends")
+      let me = await User.findOne({ _id: id }, "name phone avatar _id friends")
       // 检测用户是否已添加此好友
       let isAdd = false
       for (let f of me.friends) {
@@ -191,12 +190,12 @@ router.post('/handlereq', function *(next) {
           }
           user.save()
         })
-        this.body = {
+        ctx.body = {
           status: 200,
           message: '添加成功'
         }
       } else {
-        this.body = {
+        ctx.body = {
           status: 0,
           message: '已添加该用户'
         }
@@ -205,18 +204,18 @@ router.post('/handlereq', function *(next) {
 
     // 拒绝好友请求
     if (type == 'reject') {
-      yield User.findOne({
+      await User.findOne({
         _id: id
       }, (err, user) => {
         for (let r of user.request) {
           // 找到对应请求，并将状态置为2
           if(userid == r._id) {
             r.status = 2
-            this.body = {
+            user.save()
+            ctx.body = {
               status: 200,
               message: '拒绝成功'
             }
-            user.save()
             break
           }
         }
@@ -230,20 +229,19 @@ router.post('/handlereq', function *(next) {
 /**
  * 发送好友请求
  */
-router.post('/addfriend', function *(next) {
+router.post('/addfriend', async (ctx, next) => {
   try {
     // 根据手机号添加好友
-    const { phone, id } = this.request.body
+    const { phone, id } = ctx.request.body
     // 查找好友是否存在
-    let fri = yield User.findOne({ phone })
-    let me = yield User.findOne({ _id: id })
-    // me.
+    let fri = await User.findOne({ phone })
+    let me = await User.findOne({ _id: id })
+    // console.log(me)
     // 查找不到该好友，直接返回
-    if (!fri) return this.body = {
+    if (!fri) return ctx.body = {
       status: 0,
       message: '该用户不存在'
     }
-    // if (me)
     /**
      * @TODO 
      * 1 好友已收到用户请求，不能重复请求
@@ -258,7 +256,7 @@ router.post('/addfriend', function *(next) {
         fri.save()
       }
     })
-    this.body = {
+    ctx.body = {
       status: 200,
       message: '发送成功'
     }

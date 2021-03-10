@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = {
 	port: 8003,
 	url: 'mongodb://localhost:27017/schat',

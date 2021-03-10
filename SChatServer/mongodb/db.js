@@ -1,8 +1,6 @@
 const mongoose = require('mongoose')
 const config = require('../config/default')
-// let config = {
-//   url: 'mongodb://localhost:27017/schat'
-// }
+
 mongoose.connect(config.url, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
