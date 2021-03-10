@@ -26,6 +26,7 @@ var server = http.createServer(app.callback());
  */
 
 server.listen(port);
+console.log("正在监听"+port+"端口")
 server.on('error', onError);
 server.on('listening', onListening);
 

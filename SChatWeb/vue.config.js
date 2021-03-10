@@ -15,13 +15,21 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // 需要请求的地址
+        target: 'http://localhost:3000', // 需要请求的地址
         changeOrigin: true, // 是否跨域
         ws: false,
         pathRewrite: {
-          '^/api': '/' // 替换target中的请求地址,例如请求的时候把'/login'换成'/mock/login'
+          '^/api': '/' // 替换target中的请求地址,例如请求的时候把'/api'换成'/'
         }
       },
+      '/ws': {
+        target: 'http://localhost:3000', // 需要请求的地址
+        changeOrigin: true, // 是否跨域
+        ws: false,
+        pathRewrite: {
+          '^/ws': '/' 
+        }
+      }
     }
   },
   css: {

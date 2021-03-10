@@ -22,6 +22,7 @@ import AppHeader from '@/base/AppHeader/AppHeader'
 import AppFooter from '@/base/AppFooter/AppFooter'
 import Search from '@/views/Search/Search'
 import Index from '@/views/Index/Index'
+import { apiPost } from '@/utils/index'
 import { mapState } from 'vuex' 
   export default {
     name: 'app',
@@ -36,6 +37,15 @@ import { mapState } from 'vuex'
         'isSearch',
         'login'
       ])
+    },
+    mounted () {
+      // this.$socket.emit('connect', '连接成功')
+      apiPost('/users/login', {
+        phone: 18818306204,
+        password: 123
+      }).then((res) => {
+        console.log(res)
+      })
     }
   }
 </script>

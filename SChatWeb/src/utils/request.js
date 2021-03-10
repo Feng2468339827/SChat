@@ -1,6 +1,6 @@
 import Axios from 'axios'
 import store from '../store/store'
-import router from '../router/router'
+import router from '../router/index'
 // 基本api
 let api = '/api'
 
@@ -22,7 +22,7 @@ let checkErr = (err) => {
 }
 export async function request (options) {
   Axios.defaults.baseURL = api
-  Axios.defaults.headers.post['Content-Type'] = 'application/json'
+  Axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
   // Axios.defaults.headers.common['token'] = token
   return new Promise((resolve) => {
     Axios(options)

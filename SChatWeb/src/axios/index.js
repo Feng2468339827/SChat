@@ -8,11 +8,11 @@ const instance = axios.create(config)
 // 3. 配置信息
 let config = {
 	// 每次请求的协议、IP地址。  设置该配置后，每次请求路径都可以使用相对路径，例如"/admin/login"
-	baseURL: "http://localhost",
+	// baseURL: "http://192.168.1.1",
 	// 请求超时时间
 	timeout: 10000,
 	// 每次请求携带cookie
-	withCredentials: true
+  withCredentials: true,
 }
 
 // 请求拦截
@@ -38,7 +38,12 @@ instance.interceptors.response.use(
           }
       }
       return Promise.reject(error.response.data)
-  })
-
+  },
+  config => {
+    config.headers = {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }
+)
 // 4. 导出
 export default instance

@@ -1,6 +1,5 @@
 const router = require('koa-router')()
 const User = require('../models/user.js')
-const Id = require('../models/id.js')
 const { newPwd } = require('../config/utils')
 
 const avatar = 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default.jpg?Expires=1615124373&OSSAccessKeyId=TMP.3Ki9eFkkpkPeejomKL3p4E69UYnEUtGZXJuV4VfJt5sH1zcR7sh85qWp6mRfvJEkUTr8Ps2zFabffEDcG87KebKHV4C6zK&Signature=vZXek8M0M3MY9485oTgqs7nKN2U%3D'
@@ -40,6 +39,7 @@ router.post('/login', async (ctx, next) => {
       }, (err, user) => {
         // 若搜寻到此用户，则登录成功
         if (user) {
+          ctx.session._id = user._id
           ctx.body = {
             status: 200,
             message: '登陆成功',
@@ -54,7 +54,7 @@ router.post('/login', async (ctx, next) => {
       })
     }
   } catch (error) {
-    console.err(error)
+    console.error(error)
   }
 })
 
