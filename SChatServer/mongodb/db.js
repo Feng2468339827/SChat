@@ -1,15 +1,14 @@
 const mongoose = require('mongoose')
 const config = require('../config/default')
 
+mongoose.set('useCreateIndex', true)
 mongoose.connect(config.url, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  server:{
-    auto_reconnect: true
-  }
+  auto_reconnect: true,
+  promiseLibrary: global.Promise
 })
 
-mongoose.Promise = global.Promise
 
 const db = mongoose.connection
 

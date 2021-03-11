@@ -8,13 +8,13 @@
       class="person-setting" />
 
     <div class="person-portrait">
-      <img src="../../assets/images/portrait.jpg" alt="">
+      <img :src="user.avatar" alt="">
     </div>
-    <div class="person-name">丰</div>
+    <div class="person-name">{{user.name}}</div>
     <div class="person-id">
       <div class="person-id-word">
-        SChatID:
-        <span>1231123</span>
+        phone:
+        <span>{{user.phone}}</span>
       </div>
     </div>
 
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 import { Dialog } from 'vant'
 export default {
   created () {
@@ -41,11 +41,16 @@ export default {
       }]
     }
   },
+  computed: {
+    ...mapState([
+      'user'
+    ])
+  },
   methods: {
     ...mapMutations({
       changeType: 'SET_NAVTYPE',
       exitLogin: 'SET_LOGINSTATUS',
-      cleanLogin: 'SET_LOGINLOGIN',
+      cleanLogin: 'SET_LOGINTOKEN',
     }),
     onSelect(action, index) {
       // 退出账号

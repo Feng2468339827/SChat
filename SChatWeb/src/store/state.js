@@ -9,7 +9,9 @@ const state = {
   login: {
     token: '',
     status: false
-  }
+  },
+  // 用户信息
+  user: {}
 }
 
 export default state

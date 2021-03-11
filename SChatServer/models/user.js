@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 const userSchema = new Schema({
 	name: String,
-  avatar: {type: String, default: 'default.jpg'},
+  avatar: {type: String, default: 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default5.jpg'},
   password: String,
   phone: Number,
   // 好友集合

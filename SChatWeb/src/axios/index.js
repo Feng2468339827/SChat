@@ -38,11 +38,6 @@ instance.interceptors.response.use(
           }
       }
       return Promise.reject(error.response.data)
-  },
-  config => {
-    config.headers = {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
   }
 )
 // 4. 导出

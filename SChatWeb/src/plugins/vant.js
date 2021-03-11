@@ -13,11 +13,13 @@ import {
   CellGroup,
   Icon,
   Search,
+  Notify,
   Field,
   ActionSheet,
   Popover
 } from 'vant'
 
+Vue.use(Notify)
 Vue.use(ActionSheet)
 Vue.use(Field)
 Vue.use(Popover)

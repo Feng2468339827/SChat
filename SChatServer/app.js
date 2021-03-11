@@ -28,8 +28,8 @@ const CONFIG = {
    renew: false,  //(boolean) renew session when session is nearly expired,
 }
 
-app.use(session(CONFIG, app));
-// app.use(checktoken);
+app.use(session(CONFIG, app))
+app.use(checktoken)
 // middlewares
 app.use(bodyparser({
   enableTypes:['json', 'form', 'text']

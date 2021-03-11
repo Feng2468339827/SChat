@@ -20,6 +20,10 @@ const mutation = {
   // 设置登录token
   [types.SET_LOGINTOKEN] (state, token) {
     state.login.token = token
+  },
+  // 登陆成功设置用户信息
+  [types.SET_USERINFO] (state, user) {
+    state.user = user
   }
 }
 

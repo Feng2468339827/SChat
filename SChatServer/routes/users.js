@@ -1,8 +1,9 @@
 const router = require('koa-router')()
 const User = require('../models/user.js')
-const { newPwd } = require('../config/utils')
+const { newPwd } = require('../utils/utils')
+const token = require('../utils/token')
 
-const avatar = 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default.jpg?Expires=1615124373&OSSAccessKeyId=TMP.3Ki9eFkkpkPeejomKL3p4E69UYnEUtGZXJuV4VfJt5sH1zcR7sh85qWp6mRfvJEkUTr8Ps2zFabffEDcG87KebKHV4C6zK&Signature=vZXek8M0M3MY9485oTgqs7nKN2U%3D'
+const avatar = 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default5.jpg'
 const reg_phone = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
 
 // 加前缀
@@ -14,6 +15,7 @@ router.prefix('/users')
 router.post('/login', async (ctx, next) => {
   try {
     const { phone, password } = ctx.request.body
+    console.log(ctx.request.body)
     // 手机号为空
     if (phone == '') {
       ctx.body = {
@@ -43,7 +45,8 @@ router.post('/login', async (ctx, next) => {
           ctx.body = {
             status: 200,
             message: '登陆成功',
-            user
+            user,
+            token: token(user._id)
           }
         } else {
           ctx.body = {
@@ -62,16 +65,16 @@ router.post('/login', async (ctx, next) => {
  * 用户注册
  */
 router.post('/register', async (ctx, next) => {
+  console.log(ctx.request.body)
   try {
     const {
       phone,
       password,
-      repassword,
       name
     } = ctx.request.body
 
     // 手机号为空
-    if (phone == '') {
+    if (phone.trim == '') {
       ctx.body = {
         status: 0,
         message: '密码不能为空'
@@ -82,11 +85,17 @@ router.post('/register', async (ctx, next) => {
         status: 0,
         message: '正确填写您的手机号码'
       }
-    } else if (password != repassword) {
-      // 两次密码不一致
+    } else if (name.trim() == '') {
+      // 用户名为空
       ctx.body = {
         status: 0,
-        message: '两次密码不一致'
+        message: '用户名不能为空'
+      }
+    } else if (name.trim().length > 10) {
+      // 用户名不合法
+      ctx.body = {
+        status: 0,
+        message: '用户名不能超过10位'
       }
     } else {
       // 查找手机号是否已被注册
@@ -232,10 +241,10 @@ router.post('/handlereq', async (ctx, next) => {
 router.post('/addfriend', async (ctx, next) => {
   try {
     // 根据手机号添加好友
-    const { phone, id } = ctx.request.body
+    const { fri_phone, phone } = ctx.request.body
     // 查找好友是否存在
-    let fri = await User.findOne({ phone })
-    let me = await User.findOne({ _id: id })
+    let fri = await User.findOne({ phone: fri_phone })
+    let me = await User.findOne({ phone })
     // console.log(me)
     // 查找不到该好友，直接返回
     if (!fri) return ctx.body = {
@@ -247,8 +256,8 @@ router.post('/addfriend', async (ctx, next) => {
      * 1 好友已收到用户请求，不能重复请求
      * 2 用户已添加好友，不能请求
      */
-    // 将搜索好友信息存入用户friends数组内，添加成功
-    User.findOne({ phone }, function (err, fri) {
+
+    User.findOne({ fri_phone }, function (err, fri) {
       if (err) return console.error(err)
       if (fri) {
         // 将用户添加到好友请求列表中

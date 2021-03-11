@@ -12,6 +12,7 @@
     "config-lite": "^3.0.0",
     "debug": "^4.1.1",
     "ejs": "~2.3.3",
+    "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-convert": "^1.2.0",
@@ -22,7 +23,8 @@
     "koa-session": "^6.1.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
-    "mongoose": "^5.11.19"
+    "mongoose": "^5.11.15",
+    "socket.io": "^4.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
