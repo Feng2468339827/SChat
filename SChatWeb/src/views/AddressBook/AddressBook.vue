@@ -1,5 +1,6 @@
 <template>
   <div class="addressbook">
+    <BookCell title="新的朋友" />
     <van-index-bar>
       <div
         v-for="(item, index) in namesList"
@@ -18,12 +19,16 @@
 <script>
 import { mapMutations } from 'vuex'
 import { pySegSort } from '@/utils/utils'
+import BookCell from '@/components/BookCell/BookCell'
 export default {
   methods: {
     ...mapMutations({
       changeTitle: 'SET_TITLE',
       changeType: 'SET_NAVTYPE'
     })
+  },
+  components: {
+    BookCell
   },
   computed: {
     namesList () {

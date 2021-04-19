@@ -1,7 +1,8 @@
 const router = require('koa-router')()
 const User = require('../models/user.js')
 const { newPwd } = require('../utils/utils')
-const token = require('../utils/token')
+const Token = require('../utils/token')
+const STATUS = require('../config/status')
 
 const avatar = 'https://schatnet.oss-cn-guangzhou.aliyuncs.com/index/default5.jpg'
 const reg_phone = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
@@ -15,7 +16,6 @@ router.prefix('/users')
 router.post('/login', async (ctx, next) => {
   try {
     const { phone, password } = ctx.request.body
-    console.log(ctx.request.body)
     // 手机号为空
     if (phone == '') {
       ctx.body = {
@@ -38,16 +38,20 @@ router.post('/login', async (ctx, next) => {
       await User.findOne({
         phone,
         password: newPwd(password)
-      }, (err, user) => {
+      }, '-password -token', (err, user) => {
         // 若搜寻到此用户，则登录成功
         if (user) {
-          ctx.session._id = user._id
+          let token = Token(user)
           ctx.body = {
-            status: 200,
+            status: STATUS.LOGINOK,
             message: '登陆成功',
-            user,
-            token: token(user._id)
+            user
           }
+          // 设置全局变量，将用户信息保存在全局方便使用
+          global.user = user
+          user.token = token
+          // 更新用户token
+          user.save()
         } else {
           ctx.body = {
             status: 0,
@@ -58,6 +62,17 @@ router.post('/login', async (ctx, next) => {
     }
   } catch (error) {
     console.error(error)
+  }
+})
+
+/**
+ * 退出登录
+ */
+router.get('/exit', async (ctx, next) => {
+  try {
+    console.log(this.user)
+  } catch (error) {
+    
   }
 })
 
@@ -133,6 +148,7 @@ router.get('/findfriend', async (ctx, next) => {
   try {
     // 根据手机号搜索用户
     const { phone } = ctx.request.query
+    console.log(ctx.user)
     // 返回头像和名字
     await User.findOne({ phone }, 'name avatar phone', (err, user) => {
       // 查找得到返回用户信息
@@ -241,11 +257,14 @@ router.post('/handlereq', async (ctx, next) => {
 router.post('/addfriend', async (ctx, next) => {
   try {
     // 根据手机号添加好友
-    const { fri_phone, phone } = ctx.request.body
+    const { fri_phone } = ctx.request.body
     // 查找好友是否存在
     let fri = await User.findOne({ phone: fri_phone })
-    let me = await User.findOne({ phone })
-    // console.log(me)
+    // 拷贝用户信息
+    let me = { ...global.user }._doc
+    delete me.token
+    delete me.friends
+    delete me.request
     // 查找不到该好友，直接返回
     if (!fri) return ctx.body = {
       status: 0,
@@ -257,7 +276,7 @@ router.post('/addfriend', async (ctx, next) => {
      * 2 用户已添加好友，不能请求
      */
 
-    User.findOne({ fri_phone }, function (err, fri) {
+    User.findOne({ phone: fri_phone }, function (err, fri) {
       if (err) return console.error(err)
       if (fri) {
         // 将用户添加到好友请求列表中

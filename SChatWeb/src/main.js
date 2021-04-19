@@ -2,18 +2,21 @@ import Vue from 'vue'
 import App from './App.vue'
 import axios from './axios/index'
 import router from './router'
+import store from './store/store'
+import VueSocketIO from 'vue-socket.io'
+import SocketIO from 'socket.io-client'
+
 import 'vant/lib/index.css'
 import './plugins/vant'
-import store from './store/store'
-// import VueSocketIO from 'vue-socket.io'
+ 
+Vue.use(new VueSocketIO({
+  debug: true,
+  connection: SocketIO('ws://127.0.0.1:3000')
+}))
 
 Vue.config.productionTip = false
 Vue.prototype.axios = axios
 
-// Vue.use(new VueSocketIO({
-//   debug: true,
-//   connection: 'http://localhost:3000',
-// }))
 
 // 跳转后返回顶部
 router.afterEach(() => {

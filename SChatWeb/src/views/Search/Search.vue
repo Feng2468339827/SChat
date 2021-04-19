@@ -32,6 +32,7 @@ import { mapMutations } from 'vuex'
 import ChatCell from '@/components/ChatCell/ChatCell.vue'
 import Button from '@/components/Button/Button'
 import { Dialog, Toast } from 'vant'
+import { apiGet } from '@/utils/index'
 export default {
   components: {
     ChatCell,
@@ -41,12 +42,7 @@ export default {
     return {
       value: '',
       isSearch: false,
-      user: {
-        name: '小委屈',
-        content: 'SChatID:124214',
-        img: require('@/assets/images/portrait.jpg'),
-        id:2
-      }
+      user: {}
     }
   },
   methods: {
@@ -55,6 +51,14 @@ export default {
     }),
     // 搜索
     search () {
+      apiGet('users/findfriend',{
+        phone: this.value
+      })
+        .then(res => {
+          if (res.status === 200) {
+            this.user = res.user
+          }
+        })
       this.isSearch = true
     },
     // 添加好友

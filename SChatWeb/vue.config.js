@@ -22,13 +22,15 @@ module.exports = {
           '^/api': '/' // 替换target中的请求地址,例如请求的时候把'/api'换成'/'
         }
       },
-      '/ws': {
-        target: 'http://localhost:3000', // 需要请求的地址
-        changeOrigin: true, // 是否跨域
+      '/socket.io': {
+        target: 'http://localhost:3000',
+        ws: true,
+        changeOrigin: true
+      },
+      '/sockjs-node': {
+        target: 'http://localhost:3000',
         ws: false,
-        pathRewrite: {
-          '^/ws': '/' 
-        }
+        changeOrigin: true
       }
     }
   },

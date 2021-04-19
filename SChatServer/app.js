@@ -6,14 +6,20 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 
-const server = require('http').Server(app)
-const io = require('socket.io')(server)
 const db = require('./mongodb/db')
 const index = require('./routes/index')
 const users = require('./routes/users')
-const chat = require('./routes/chat')
 const session = require('koa-session')
 const checktoken = require('./middleware/token')
+
+
+
+app.use(async (ctx, next) => {
+  ctx.set('Access-Control-Allow-Origin', 'null')
+  ctx.set('Access-Control-Allow-Credentials', 'true')
+  await next()
+})
+
 // error handler
 onerror(app)
 
@@ -42,13 +48,6 @@ app.use(views(__dirname + '/views', {
   extension: 'ejs'
 }))
 
-
-io.on('connection', socket => {
-  socket.on("chat", async (msg) => {
-    console.log(msg)
-   io.emit("chat",chatObj);
-  })
-})
 
 // logger
 app.use(async (ctx, next) => {

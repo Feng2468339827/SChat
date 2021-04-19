@@ -12,6 +12,7 @@ const userSchema = new Schema({
     avatar: String,
     _id: String
   }], default: []},
+  token: { type: String, default: ''},
   // 请求集合
   request: {type: [{
     /**

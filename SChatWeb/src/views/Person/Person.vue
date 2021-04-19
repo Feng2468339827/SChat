@@ -50,7 +50,6 @@ export default {
     ...mapMutations({
       changeType: 'SET_NAVTYPE',
       exitLogin: 'SET_LOGINSTATUS',
-      cleanLogin: 'SET_LOGINTOKEN',
     }),
     onSelect(action, index) {
       // 退出账号
@@ -61,8 +60,9 @@ export default {
         })
           .then(() => {
             // on confirm
-            this.exitLogin()
-            this.cleanLogin()
+            this.exitLogin(false)
+            // 清空本地缓存
+            localStorage.setItem('token', '')
           })
           .catch(() => {
             // on cancel

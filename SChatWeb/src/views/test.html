@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <title>Socket接口测试</title>
+</head>
+ 
+<body>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+    <script type="text/javascript">
+    $(function () {
+        var myAction = {}, socket;
+ 
+        var socketConfig = {
+            token: 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZW4iLCJpYXQiOjE1MzU3MTE0MTcsImRhdGEiOnsidXNlcm5hbWUiOiJ4dXRvbmdiYW8iLCJpc19zdXBlcnVzZXIiOjEsImlkIjo4LCJsb2dpbl90aW1lIjoxNTM1NzExNDE3fSwiZXhwIjoxNTM2MzExNDE3fQ.ukKbNeZ8I3SlAlbWrmGxlTmMWc-gFjz0Z6wUaXnaBrs',
+            task_id: '1250659e-aba9-11e8-91a6-000c29475554'
+        };  
+ 
+        $.extend(myAction, {
+            initSocket: function () {
+                socket = io("ws://localhost:3000");  //ip
+            },
+            getData: function () {
+                if (socket.connected) {
+                    socket.emit("get_tasks", {
+                        token: socketConfig.token
+                    });
+                    socket.on("push_tasks", function(res) {
+                        console.log(res);
+                    });
+ 
+                    socket.emit("getlog", {
+                        token: socketConfig.token,
+                        task_id: socketConfig.task_id,
+                        direction: 'down',      //up, down 向上查，向下查
+                        log_time: null,         //日志里的时间, 1532249295
+                        start_time: null,       //滑动条的起始时间
+                        end_time: null,         //滑动条的结束时间
+                        size: 10                //条数
+                    });
+                    socket.on("logpush", function(res) {
+                        console.log(res);
+                    });  
+ 
+                    //下一页日志
+                    socket.emit("getlog", {
+                        token: socketConfig.token,
+                        task_id: socketConfig.task_id,
+                        direction: 'down',                
+                        log_time: 1535560351.844,         
+                        start_time: null,                 
+                        end_time: null,                   
+                        size: 10                          
+                    });   
+ 
+                    //上一页日志
+                    socket.emit("getlog", {
+                        token: socketConfig.token,
+                        task_id: socketConfig.task_id,
+                        direction: 'up',                
+                        log_time: 1535560351.844,         
+                        start_time: 1535560332.681,                 
+                        end_time: 1535560351.844,                   
+                        size: 10                         
+                    });   
+ 
+                    //下一页日志，限制结束时间
+                    socket.emit("getlog", {
+                        token: socketConfig.token,
+                        task_id: socketConfig.task_id,
+                        direction: 'down',                
+                        log_time: 1535560351.844,         
+                        start_time: 1535560351.844,                 
+                        end_time: 1535560353.463,                   
+                        size: 10                         
+                    });                                                                                
+                } else {
+                    setTimeout(myAction.getData, 500);
+                }
+            },  
+        });
+ 
+        var init = function () {
+            myAction.initSocket();
+            myAction.getData();
+        }();
+    })
+    </script>
+</body>
+ 
+</html>

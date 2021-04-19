@@ -19,7 +19,16 @@ var port = normalizePort(process.env.PORT || '3000');
  * Create HTTP server.
  */
 
+
 var server = http.createServer(app.callback());
+const socketIO = require('socket.io');
+const addSocket = require('../socket/index')
+const io = socketIO(server,{
+  cors: {
+      origin: '*'
+  }
+});
+addSocket(io)
 
 /**
  * Listen on provided port, on all network interfaces.

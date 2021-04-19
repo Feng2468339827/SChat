@@ -9,6 +9,7 @@
       class="chatbox-input"></div> -->
     <input
       v-model="chatword"
+      @keyup.enter="sendMessage"
       type="text"
       class="chatbox-input" />
     <van-icon
@@ -24,6 +25,7 @@
     <!-- 输入框不为空 -->
     <div
       v-else
+      @click="sendMessage"
       class="chatbox-send">发送</div>
   </div>
 </template>
@@ -37,6 +39,11 @@ export default {
     }
   },
   methods: {
+    sendMessage () {
+      // 将聊天信息返回父组件，并将输入框清空
+      this.$emit('sendMessage', this.chatword)
+      this.chatword = ''
+    }
   }
 }
 </script>

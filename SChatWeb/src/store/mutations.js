@@ -15,15 +15,15 @@ const mutation = {
   },
   // 设置登陆状态
   [types.SET_LOGINSTATUS] (state, status) {
-    state.login.status = status
-  },
-  // 设置登录token
-  [types.SET_LOGINTOKEN] (state, token) {
-    state.login.token = token
+    state.login = status
   },
   // 登陆成功设置用户信息
   [types.SET_USERINFO] (state, user) {
     state.user = user
+  },
+  // 设置新的朋友页面展现
+  [types.SET_SHOWNEWFRIEND] (state, show) {
+    state.isShowNewFriend = show
   }
 }
 

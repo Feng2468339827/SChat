@@ -10,23 +10,16 @@
       <van-tabbar-item icon="friends-o">通讯录</van-tabbar-item>
       <van-tabbar-item icon="user-o">我的</van-tabbar-item>
     </van-tabbar>
-
-    <!-- 聊天框 -->
-    <ChatBox v-if="navType === 'chat'" />
   </div>
 </template>
 
 <script>
-import ChatBox from '@/components/ChatBox/ChatBox'
 import { mapState } from 'vuex'
 export default {
  data() {
     return {
       active: 0
     }
-  },
-  components: {
-    ChatBox
   },
   computed: {
     ...mapState([
@@ -46,6 +39,10 @@ export default {
       ]
       this.$router.push(route[index])
     }
+  },
+  created () {
+    // 首次加载回到首页
+    this.changeViews(0)
   }
 }
 </script>

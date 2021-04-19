@@ -1,19 +1,22 @@
 <template>
   <div id="app">
     <!-- 网站头部 -->
-    <AppHeader v-if="login.status" />
+    <AppHeader v-if="login" />
 
     <!-- 视图 -->
-    <router-view  v-if="login.status" class="views" />
+    <router-view  v-if="login" class="views" />
 
     <!-- 网站底部 -->
-    <AppFooter  v-if="login.status" />
+    <AppFooter  v-if="login" />
     
     <!-- 搜索视图 -->
-    <Search v-show="isSearch && login.status" />
+    <Search v-show="isSearch && login" />
+
+    <!-- 新的朋友视图 -->
+    <NewFriend v-show="isShowNewFriend && login" />
 
     <!-- 登录视图 -->
-    <Index v-if="!login.status" />
+    <Index v-if="!login" />
   </div>
 </template>
 
@@ -22,39 +25,55 @@ import AppHeader from '@/base/AppHeader/AppHeader'
 import AppFooter from '@/base/AppFooter/AppFooter'
 import Search from '@/views/Search/Search'
 import Index from '@/views/Index/Index'
-import { mapState } from 'vuex' 
+import NewFriend from '@/views/NewFriend/NewFriend'
+import jwt from 'jsonwebtoken'
+import { mapState, mapMutations } from 'vuex' 
   export default {
     name: 'app',
     components: {
       AppHeader,
       AppFooter,
       Search,
-      Index
+      Index,
+      NewFriend
     },
     computed: {
       ...mapState([
         'isSearch',
-        'login'
+        'login',
+        'user',
+        'isShowNewFriend'
       ])
     },
-    mounted () {
-      // this.$socket.emit('connect', '连接成功')
+    created() {
+      // token凭证存在则自动登录
+      let token = localStorage.getItem('token')
+      if (token != 'undefined' && token) {
+        let user = jwt.verify(token, 'token').user
+        this.setUser(user)
+        this.setLogin(true)
+      }
+    },
+    mounted() {
+      // 已登录
+      if (JSON.stringify(this.user) != '{}') {
+        // 用户上线
+        this.$socket.emit("sign", { user: this.user }, res => {
+          console.log(res)
+        })
+      }
+    },
+    methods: {
+      ...mapMutations({
+        setLogin: 'SET_LOGINSTATUS',
+        setUser: 'SET_USERINFO'
+      }),
     }
   }
 </script>
 
 <style lang="stylus">
 @import "./assets/styl/app.styl"
-
-// @font-face {
-//   font-family: 'iconfont';
-//   src: url('./assets/icon/iconfont.eot');
-//   src: url('./assets/icon/iconfont.eot?#iefix') format('embedded-opentype'),
-//       url('./assets/icon/iconfont.woff2') format('woff2'),
-//       url('./assets/icon/iconfont.woff') format('woff'),
-//       url('./assets/icon/iconfont.ttf') format('truetype'),
-//       url('./assets/icon/iconfont.svg#iconfont') format('svg');
-// }
 
 #app 
   font-family Avenir, Helvetica, Arial, sans-serif

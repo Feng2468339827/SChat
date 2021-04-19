@@ -5,7 +5,7 @@
     class="chatcell flex-between">
     <img
       class="chatcell-image"
-      :src="chat.img"
+      :src="chat.avatar"
       alt="头像">
 
     <div class="chatcell-info flex-between">
@@ -13,7 +13,7 @@
         {{chat.name}}
       </div>
       <div class="chatcell-preread van-ellipsis">
-        {{chat.content}}
+        <!-- {{chat.content}} -->
       </div>
 
       <!-- 暂不做 -->
@@ -38,7 +38,7 @@ export default {
     }),
     // 向父组件传递点击聊天者id
     clickCell () {
-      this.$emit('clickCell',this.chat)
+      this.$emit('clickCell', this.chat)
     }
   }
 }

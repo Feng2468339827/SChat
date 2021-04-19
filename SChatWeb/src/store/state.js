@@ -6,12 +6,11 @@ const state = {
   // 搜索页展现
   isSearch: false,
   // 登陆状态
-  login: {
-    token: '',
-    status: false
-  },
+  login: false,
   // 用户信息
-  user: {}
+  user: {},
+  // 新的朋友展现
+  isShowNewFriend: false
 }
 
 export default state
